@@ -1,0 +1,18 @@
+* {
+  padding: 0px;
+  margin: 0px;
+}
+
+.header {
+  background-color: rgb(25, 120, 197);
+}
+
+.img {
+  width: 64px;
+  height: 64px;
+}
+
+.heading_n {
+  font-size: 25px;
+  color: white;
+}

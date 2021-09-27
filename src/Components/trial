@@ -1,0 +1,461 @@
+import React, { Component } from "react";
+import car_pic from "../parking.svg";
+import AlotDefaultParking from "./AlotDefaultParking.js";
+import "./ParkCar.css";
+class ParkCar extends Component {
+  constructor(props) {
+    super(props);
+    const {parkingSize,defaultParked}=this.props
+    this.state = {
+      ownerName: "sonal",
+      carName: "alto",
+      numberPlate: "MH-15-BD-5656",
+      entryDate: new Date(),
+      curDate: "",
+      NameError: "",
+      carError: "",
+      numberPlateError: "",
+      DateError: "",
+      car_alotted: 0,
+      color: "default",
+      carColorError: "",
+      refereshed_details:[],
+      SearchItem:'',
+      parkingSize:parkingSize,
+      defaultParked:defaultParked,
+      NodataError:''
+    };
+  }
+
+  submithandler = (e) => {
+    // console.log("called")
+    const value =
+      e.target.name == "numberPlate"
+        ? e.target.value.toUpperCase()
+        : e.target.value;
+    this.setState({
+      [e.target.name]: value,
+    });
+  };
+
+  validForm = () => {
+    var isValid = true;
+    // alert("submitData called")
+
+    if (this.state.ownerName.length === 0) {
+      this.setState({ NameError: "Owner Name Should Not Be Blank" });
+      isValid = false;
+    } else if (this.state.ownerName.length <= 1) {
+      this.setState({
+        NameError: "Owner Name Should be greater than 1 character",
+      });
+      isValid = false;
+    } else if (this.state.ownerName.length > 0) {
+      this.setState({ NameError: "" });
+      isValid = true;
+    }
+    if (this.state.carName.length === 0) {
+      this.setState({ carError: "Car Name Should Not Be Blank" });
+      isValid = false;
+    } else if (this.state.carName.length <= 1) {
+      this.setState({
+        carError: "Car Name Should be greater than 1 character",
+      });
+      isValid = false;
+    } else if (this.state.carName.length > 0) {
+      this.setState({ carError: "" });
+      isValid = true;
+    }
+    if (
+      !this.state.numberPlate.match(
+        /^[a-zA-Z]{1,3}-[0-9]{2}-[a-zA-Z]{1,2}-[0-9]{1,4}/
+      )
+    ) {
+      this.setState({
+        numberPlateError: "Entered car number plate is not valid",
+      });
+      isValid = false;
+    } else {
+      this.setState({ numberPlateError: "" });
+      isValid = true;
+    }
+    if (this.state.color == "default") {
+      this.setState({
+        carColorError: "Please entere valid car color",
+      });
+      isValid = false;
+    } else {
+      this.setState({
+        carColorError: "",
+      });
+      isValid = true;
+    }
+   
+    return isValid;
+  };
+
+  dynamicSearch=(e)=>{
+
+console.log(e.target.value)
+    this.setState({
+      SearchItem: e.target.value
+    },()=>this.searchData());
+
+    // this.renderCarParkedDeatil() 
+}
+
+searchData=()=>{
+  // e.preventDefault();
+  if(this.state.SearchItem==null || this.state.SearchItem=='' || this.state.SearchItem==undefined){
+    let arr=JSON.parse(sessionStorage.getItem('car_parked'));
+    this.setState({
+      refereshed_details:arr
+
+    })
+  }
+  else{
+    let arr= this.state.refereshed_details.filter(a=>a.color.toLowerCase().includes(this.state.SearchItem))
+  // console.log("new array is "+arr)
+  let arr_updated=JSON.parse(sessionStorage.getItem('car_parked'));
+  this.setState({
+    refereshed_details:arr
+
+  })
+
+  if(arr=='' || arr==undefined || arr==null ){
+    this.setState({
+      NodataError:'no data to display',
+    })
+  }
+   
+  }
+  
+   
+}
+submitData = (e) => {
+  var Parked_car_detail = JSON.parse(sessionStorage.getItem("car_parked"));
+
+  const validForm = this.validForm();
+  // console.log(validForm)
+  var car_detail={} ;
+
+  if(Parked_car_detail==null && validForm==true){
+    Parked_car_detail=[]
+// console.log("in if ")
+    car_detail = {
+      isempty: false,
+      car_alotted: 1,
+      ownerName: this.state.ownerName,
+      carName: this.state.carName,
+      numberPlate: this.state.numberPlate,
+      entryDate: this.state.entryDate,
+      color: this.state.color,
+      time: new Date().toLocaleTimeString(),
+    };
+    Parked_car_detail.push(car_detail);
+    // Parked_car_detail.push({});
+
+    sessionStorage.setItem("car_parked", JSON.stringify(Parked_car_detail));
+    var Parked_car_detail_u = JSON.parse(sessionStorage.getItem("car_parked"));
+    this.setState({
+      refereshed_details:Parked_car_detail_u
+    })
+ }
+ else if(Parked_car_detail.length>0 && validForm==true){
+// console.log("in else if ")
+  
+ let cnt =true;
+for(let i = 1 ; i <= Parked_car_detail.length;i++){
+  if(Parked_car_detail[i].isempty==true){
+    car_detail = {
+      isempty: false,
+      car_alotted: i,
+      ownerName: this.state.ownerName,
+      carName: this.state.carName,
+      numberPlate: this.state.numberPlate,
+      entryDate: this.state.entryDate,
+      color: this.state.color,
+      time: new Date().toLocaleTimeString()
+    };
+    cnt=false;
+    Parked_car_detail[i]=car_detail;
+
+    sessionStorage.setItem("car_parked", JSON.stringify(Parked_car_detail));
+    var Parked_car_detail_u = JSON.parse(sessionStorage.getItem("car_parked"));
+    this.setState({
+      refereshed_details:Parked_car_detail_u
+    })
+  break;
+
+  }
+}
+  if(cnt==true){
+// console.log("in if true ")
+
+    car_detail = {
+      isempty: false,
+      car_alotted:Parked_car_detail.length+1,
+      ownerName: this.state.ownerName,
+      carName: this.state.carName,
+      numberPlate: this.state.numberPlate,
+      entryDate: this.state.entryDate,
+      color: this.state.color,
+      time: new Date().toLocaleTimeString(),
+    };
+    Parked_car_detail.push(car_detail);
+    sessionStorage.setItem("car_parked", JSON.stringify(Parked_car_detail));
+    var Parked_car_detail_u = JSON.parse(sessionStorage.getItem("car_parked"));
+    this.setState({
+      refereshed_details:Parked_car_detail_u
+    })
+  }
+  
+
+// console.log(Parked_car_detail)
+}
+e.preventDefault()
+}
+  
+  remove_car(i){
+    var Parked_car_detail = JSON.parse(sessionStorage.getItem("car_parked"));
+    var car_detail = {
+      isempty: true,
+      car_alotted: '',
+      ownerName: '',
+      carName: '',
+      numberPlate: '',
+      entryDate: '',
+      color: '',
+      time: '',
+    };
+    Parked_car_detail[i]=car_detail
+    sessionStorage.setItem("car_parked", JSON.stringify(Parked_car_detail));
+    var Parked_car_detail = JSON.parse(sessionStorage.getItem("car_parked"));
+
+      this.setState({
+        refereshed_details:Parked_car_detail
+      })
+    this.renderCarParkedDeatil()
+    // alert("called renderCarParkedDeatil from remove car")
+
+  }
+
+  componentWillMount(){
+    var arr = JSON.parse(sessionStorage.getItem("car_parked"));
+    if(arr==null){
+      arr=[]
+      this.setState({
+        refereshed_details:[]
+      })
+    }
+
+  }
+  componentDidMount() {
+    // console.log(this.state.entryDate);
+    // console.log(this.props.location.state)
+    // this.alotDefaultParking();
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, "0");
+    var mm = String(today.getMonth() + 1).padStart(2, "0");
+    var yyyy = today.getFullYear();
+    today = yyyy + "-" + mm + "-" + dd;
+      var Parked_car_detail = JSON.parse(sessionStorage.getItem("car_parked"));
+      if(Parked_car_detail==null){
+        Parked_car_detail=[]
+      }
+this.setState({
+  refereshed_details:Parked_car_detail,
+  curDate: today
+})
+  }
+  renderCarParkedDeatil = () => {
+    // alert("renderCarParkedDeatil called")
+    var Parked_car_detail = JSON.parse(sessionStorage.getItem("car_parked"));
+  
+    if (Parked_car_detail == null) {
+      Parked_car_detail = [];
+    }
+    var i=1;
+    return this.state.refereshed_details.map((parking_detail, index) => {
+        
+
+      // console.log(Parked_car_detail)
+      const {car_alotted,color,entryDate,carName,numberPlate,ownerName,time,isempty} = parking_detail;
+      var n=new Date(entryDate)
+      // console.log(typeof(n))
+      var dd = String(n.getDate()).padStart(2, "0");
+    var mm = String(n.getMonth() + 1).padStart(2, "0");
+      var yyyy = n.getFullYear();
+      n = yyyy + "-" + mm + "-" + dd;
+      if(isempty==false){
+      return (
+        
+        <tr key={index}>
+          <td>{i++} </td>
+
+          <td>{ownerName}</td>
+          <td>{carName}</td>
+          <td>{numberPlate}</td>
+          <td>{n}</td>
+          <td> {time}</td>
+          <td> {car_alotted}</td>
+
+      <td> {color}</td>
+          
+          <td>
+            <button class="btn btn-danger delete" onClick={()=>this.remove_car(index)}>X</button>
+          </td>
+        </tr>
+      );
+
+      }
+
+    }
+
+    );
+  };
+
+  render() {
+    // console.log("called")
+    return (
+      <div>
+<AlotDefaultParking obj={this.props.location.state}/>
+{/* <AlotDefaultParking /> */}
+
+        <header class="shadow" className="header">
+          <div class="header-content d-flex justify-content-center p-2">
+            <img
+              src={car_pic}
+              className="img"
+              alt="not found"
+              id="header-logo"
+            />
+            <div className="ml-5 align-self-center heading_n">Parking Lot</div>
+          </div>
+        </header>
+        <div className="container">
+          <form class="w-50 mx-auto mt-3" autoComplete="off">
+            <h5 class="text-center">Add Car to Parking Lot</h5>
+            <div class="form-group">
+              <label for="owner">Owner:</label>
+              <input
+                type="text"
+                class="form-control rounded-1 shadow-sm"
+                name="ownerName"
+                placeholder="Owner Name"
+                value={this.state.ownerName}
+                onChange={this.submithandler}
+              />
+              <span style={{ color: "red" }}> {this.state.NameError}</span>
+            </div>
+            <div class="form-group">
+              <label for="car">Car:</label>
+              <input
+                type="text"
+                class="form-control rounded-1 shadow-sm"
+                name="carName"
+                placeholder="Car Name"
+                value={this.state.carName}
+                onChange={this.submithandler}
+              />
+              <span style={{ color: "red" }}> {this.state.carError}</span>
+            </div>
+            <div class="form-group">
+              <label for="licensePlate">Car Number Plate:</label>
+              <input
+                type="text"
+                class="form-control rounded-1 shadow-sm"
+                name="numberPlate"
+                placeholder="MH-15-XX-1111"
+                value={this.state.numberPlate}
+                onChange={this.submithandler}
+              />
+              <span style={{ color: "red" }}>
+                {" "}
+                {this.state.numberPlateError}
+              </span>
+            </div>
+            <div class="row">
+              {/* <div className="col-3"> </div> */}
+              <div class="col-6 form-group">
+                <label for="entryDate">Entry Date:</label>
+                <input
+                  type="date"
+                  class="form-control rounded-1 shadow-sm"
+                  name="entryDate" 
+                  min={this.state.curDate}
+                  value={this.state.curDate}
+                  onChange={this.submithandler}
+                />
+                <span style={{ color: "red" }}> {this.state.DateError}</span>
+              </div>
+
+              {/* <div className="col-3"> </div> */}
+              <div class="col-6 form-group">
+                <label for="color">Color:</label>
+                <select
+                  class="form-control rounded-1 shadow-sm"
+                  name="color"
+                  onChange={this.submithandler}
+                >
+                  <option value="default"> select car color </option>
+                  <option value="red"> Red </option>
+                  <option value="black"> Black </option>
+                  <option value="white"> White </option>
+                  {/* <option value="Other"> Other </option> */}
+                </select>
+                <span style={{ color: "red" }}>
+                  {" "}
+                  {this.state.carColorError}
+                </span>
+              </div>
+             
+            </div>
+            <button
+              type="submit"
+              class="btn mx-auto d-block mt-2 rounded-0 shadow "
+              id="btnOne"
+              onClick={this.submitData}
+            >
+              Add Car
+            </button>
+            </form>
+
+          <div class="table-container mt-5 mb-5 w-75 mx-auto">
+            <h5 class="text-center mb-3">List of Cars in Parking Lot</h5>
+            {/* <div className='row'> */}
+            <form>
+              <div className='form-group'>          
+                  <input type="text" className='form-control mb-2' name='SearchItem' value={this.state.SearchItem} onChange={(e)=>this.dynamicSearch(e)} placeholder="Search for car color"></input>
+            </div>
+            </form>
+            {/* </div> */}
+
+            <table class="table table-striped shadow ">
+              <thead class="text-white header">
+                <tr>
+                  <th>sr no</th>
+                  <th>Owner</th>
+                  <th>Car Name</th>
+                  <th>License Plate</th>
+                  <th>Entry Date</th>
+                  <th> Time</th>
+                  <th> Parking allotted</th>
+                  <th> Color</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              
+              {
+                this.state.NodataError!=''?<tbody><tr ><th colspan="9">{this.state.NodataError}</th></tr></tbody>:<tbody>{this.renderCarParkedDeatil()}</tbody>
+              }
+            </table>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+}
+
+export default ParkCar;
